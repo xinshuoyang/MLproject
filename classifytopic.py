@@ -30,17 +30,46 @@ n_top_words = 50
 t0 = time()
 print("Loading dataset and extracting TF-IDF features...")
 
-question = []
+#	training data
+train_question = []
+train_id = []
+train_answer = []
+n_train = 0
 for row in DictReader(open('sci_train.csv')):
-	question += [row['question']]
+	train_question += [row['question']]
+	train_id += [row['id']]
 
+	if row['correctAnswer'] == 'A':
+		train_answer += [row['answerA']]
+	elif row['correctAnswer'] == 'B':
+		train_answer += [row['answerB']]
+	elif row['correctAnswer'] == 'C':
+		train_answer += [row['answerC']]
+	else:
+		train_answer += [row['answerD']]
+	n_train += 1
+
+#	test data
+test_question = []
+test_id = []
+test_A = []
+test_B = []
+test_C = []
+test_D = []
+n_test = 0
 for row in DictReader(open('sci_test.csv')):
-	question += [row['question']]
+	test_question += [row['question']]
+	test_id += [row['id']]
+	test_A += [row['answerA']]
+	test_B += [row['answerB']]
+	test_C += [row['answerC']]
+	test_D += [row['answerD']]
+	n_test += 1
 
 vectorizer = TfidfVectorizer(max_df=0.90, min_df=1, max_features=n_features,
                              stop_words='english')
 
-tfidf = vectorizer.fit_transform(question)
+tfidf = vectorizer.fit_transform(train_question+test_question)
 print("done in %0.3fs." % (time() - t0))
 
 # Fit the NMF model
@@ -75,51 +104,44 @@ stemmer = WordNetLemmatizer()
 train = defaultdict(dict)
 
 counts = 0
-for row in DictReader(open('sci_train.csv')):
+for j in xrange(0, n_train):
 	words = []
-	raw = row['question'].lower()
+	raw = train_question[j].lower()
 	sent = ''.join(ch for ch in raw if ch not in punct).split()
 	for w in sent:
 		ws = stemmer.lemmatize(w)
 		if ws not in stop:
 			words.append(ws)
-
-	if row['correctAnswer'] == 'A':
-		answer = row['answerA']
-	elif row['correctAnswer'] == 'B':
-		answer = row['answerB']
-	elif row['correctAnswer'] == 'C':
-		answer = row['answerC']
-	else:
-		answer = row['answerD']
-
-	train[row['id']]['words'] = words
-	train[row['id']]['answer'] = answer
+	answer = train_answer[j]
+	train[train_id[j]]['words'] = words
+	train[train_id[j]]['answer'] = answer
 	for i in xrange(0, n_topics):
-		train[row['id']]['topic'+str(i)] = topic_prob[counts][i]
+		train[train_id[j]]['topic'+str(i)] = topic_prob[counts][i]
 	counts += 1
 
-json.dump(train, open('post_train.json', 'w'))
+json.dump(train, open('post_train_v2.json', 'w'))
 
 #	write cleaned test data
 test = defaultdict(dict)
+print counts
 
-for row in DictReader(open('sci_test.csv')):
+
+for j in xrange(0, n_test):
 	words = []
-	raw = row['question'].lower()
+	raw = test_question[j].lower()
 	sent = ''.join(ch for ch in raw if ch not in punct).split()
 	for w in sent:
 		ws = stemmer.lemmatize(w)
 		if ws not in stop:
 			words.append(ws)
 
-	test[row['id']]['words'] = words
-	test[row['id']]['answerA'] = row['answerA']
-	test[row['id']]['answerB'] = row['answerB']
-	test[row['id']]['answerC'] = row['answerC']
-	test[row['id']]['answerD'] = row['answerD']
+	test[test_id[j]]['words'] = words
+	test[test_id[j]]['answerA'] = test_A[j]
+	test[test_id[j]]['answerB'] = test_B[j]
+	test[test_id[j]]['answerC'] = test_C[j]
+	test[test_id[j]]['answerD'] = test_D[j]
 
 	for i in xrange(0, n_topics):
-		test[row['id']]['topic'+str(i)] = topic_prob[counts][i]
+		test[test_id[j]]['topic'+str(i)] = topic_prob[counts][i]
 	counts += 1
-json.dump(test, open('post_test.json', 'w'))
+json.dump(test, open('post_test_v2.json', 'w'))
