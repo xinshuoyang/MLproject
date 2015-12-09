@@ -19,7 +19,7 @@ from collections import defaultdict
 
 
 n_features = 5000
-n_topics = 2
+n_topics = 20
 n_top_words = 50
 
 # Load the 20 newsgroups dataset and vectorize it. We use a few heuristics
@@ -66,7 +66,7 @@ for row in DictReader(open('sci_test.csv')):
 	test_D += [row['answerD']]
 	n_test += 1
 
-vectorizer = TfidfVectorizer(max_df=0.90, min_df=1, max_features=n_features,
+vectorizer = TfidfVectorizer(max_df=0.95, min_df=1, max_features=n_features,
                              stop_words='english')
 
 tfidf = vectorizer.fit_transform(train_question+test_question)
