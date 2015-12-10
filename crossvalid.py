@@ -8,7 +8,7 @@ from sklearn.cross_validation import train_test_split
 from random import sample
 
 n_data = 5441
-test_sample = sample(range(0, 5441), 544)
+test_sample = sample(range(0, 5441), 4)
 
 counts = 0
 train = defaultdict(list)
@@ -35,6 +35,8 @@ for row in DictReader(open('sci_train.csv')):
 for ii in train.keys():
 	train[ii] = [' '.join(train[ii])]
 
+print len(train.keys())
+print len(test.keys())
 right = 0
 for ii in test.keys():
 	documents = []
