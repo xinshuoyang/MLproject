@@ -48,7 +48,8 @@ for row in DictReader(open('sci_train.csv')):
 	else:
 		train_answer += [row['answerD']]
 	n_train += 1
-
+print train_answer
+sys.exit()
 #	test data
 test_question = []
 test_id = []
