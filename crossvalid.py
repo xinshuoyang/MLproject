@@ -4,11 +4,10 @@ from sets import Set
 import sys
 import json
 from sklearn.feature_extraction.text import TfidfVectorizer
-from sklearn.cross_validation import train_test_split
 from random import sample
 
 n_data = 5441
-test_sample = sample(range(0, 5441), 4)
+test_sample = sample(range(0, 5441), 544)
 
 counts = 0
 train = defaultdict(list)
@@ -35,8 +34,6 @@ for row in DictReader(open('sci_train.csv')):
 for ii in train.keys():
 	train[ii] = [' '.join(train[ii])]
 
-print len(train.keys())
-print len(test.keys())
 right = 0
 for ii in test.keys():
 	documents = []
@@ -51,6 +48,5 @@ for ii in test.keys():
 	pred = answer[(tfidf * tfidf.T).A[-1][:-1].argsort()[-1]][-1]
 	if pred == test[ii]['correctAnswer']:
 		right += 1
-		print right
 
 print float(right)/float(len(test.keys()))
